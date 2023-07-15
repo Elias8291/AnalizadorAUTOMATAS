@@ -1,0 +1,177 @@
+package codigo;
+
+import java_cup.runtime.Symbol;
+    
+action code{:
+    TablaSimbolos ta = new TablaSimbolos();   
+    Object entero=null;
+public Object getEntero() {
+        return this.entero;
+    }
+
+:}
+
+parser code
+{: 
+    private Symbol s;
+    private TablaSimbolos ta ;
+    public void syntax_error(Symbol s){
+        this.s = s;
+    }
+
+
+    public Symbol getS(){
+        return this.s;
+}
+
+
+:};
+
+ terminal Linea, Comillas, Int, Float, Punto, Char, Cadena, If, Else, Do, While, For, Main, Clase, Publico, Void,
+    Igual, Suma, Resta, Multiplicacion, Division, Op_logico, Op_relacional,
+    Op_atribucion, Op_incremento, Op_booleano, Parentesis_a, Parentesis_c,
+    Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,
+    Numero, Caracter, ERROR;
+non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, IF, IF_ELSE,
+    WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR, METODO;
+
+start with INICIO;
+
+INICIO ::= 
+    Clase Identificador Llave_a  Llave_c |
+    Publico Clase Identificador Llave_a  Llave_c |
+    Clase Identificador Llave_a METODO  Llave_c |
+    Publico Clase Identificador Llave_a METODO Llave_c 
+;
+
+METODO ::=
+    Publico Void Identificador Parentesis_a Parentesis_c Llave_a SENTENCIA Llave_c |
+    Void Identificador Parentesis_a Parentesis_c Llave_a Llave_c |
+    Void Identificador Parentesis_a Parentesis_c Llave_a SENTENCIA Llave_c |
+    Publico Void Identificador Parentesis_a Parentesis_c Llave_a Llave_c
+;
+
+SENTENCIA ::= 
+    SENTENCIA DECLARACION |
+    DECLARACION |
+    SENTENCIA IF | 
+    IF |
+    SENTENCIA IF_ELSE |
+    IF_ELSE |
+    SENTENCIA WHILE |
+    WHILE |
+    SENTENCIA DO_WHILE
+    DO_WHILE |
+    SENTENCIA FOR |
+    FOR
+;
+DECLARACION ::= 
+    Int Identificador:i1 P_coma {:
+            RESULT=i1.toString();
+            ta.crearEntradada(i1.toString(), "integer");
+            :} | 
+   Identificador:i1 Igual Numero:e1  {:
+            RESULT=i1.toString();
+            ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);      
+            :} P_coma|
+    
+            
+    Identificador Igual Identificador Suma Identificador P_coma |
+    Int Identificador Op_atribucion Numero P_coma |
+    Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
+             RESULT=i2.toString();
+             String nume=e3.toString()+"."+e2.toString();
+             ta.verificarVariableInde(i2.toString(),"integer",nume,ta);      
+             :}P_coma | 
+    Int Identificador:i1 Igual Numero:e1{:
+            RESULT=i1.toString();
+            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
+            :} P_coma |
+
+    Int Identificador:i1 Igual Caracter:e1{:
+            RESULT=i1.toString();
+            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
+            :} P_coma |
+    Int Identificador Op_incremento P_coma | 
+    Int Op_incremento Identificador P_coma | 
+    Float Identificador:i2 P_coma{:
+            RESULT=i2.toString();
+            ta.crearEntradada(i2.toString(), "float");
+            :}|
+ Float Identificador:i2 Igual Numero:e3 {:
+        RESULT=i2.toString();
+        ta.verificarVariableInde(i2.toString(),"float",e3.toString()+".0",ta);
+        :}P_coma | 
+
+Float Identificador:i2 Igual Caracter:e3 {:
+        RESULT=i2.toString();
+        ta.verificarVariableInde(i2.toString(),"float",e3.toString(),ta);
+        :}P_coma | 
+    Float Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
+        RESULT=i2.toString();
+        String nume=e3.toString()+"."+e2.toString();
+        ta.verificarVariableInde(i2.toString(),"float",nume,ta);
+        :}P_coma | 
+    Identificador:i2 Igual Numero:e3 Punto Numero:e2 P_coma {:
+        RESULT=i2.toString();
+        String nume=e3.toString()+"."+e2.toString();
+        ta.setValor(i2.toString(),nume);
+        :}|
+    Cadena Identificador Op_atribucion Comillas Comillas P_coma |
+    Cadena Identificador Igual Comillas Comillas P_coma |
+    Cadena Identificador Op_atribucion Comillas Identificador Comillas P_coma |
+    Cadena Identificador Igual Comillas Identificador Comillas P_coma |
+    Char Identificador:i3 P_coma{:
+            RESULT=i3.toString();
+            ta.crearEntradada(i3.toString(), "char");
+            :}|
+    Char Identificador:i3 Igual Numero:e3{:   
+            RESULT=i3.toString();
+            ta.verificarVariableInde(i3.toString(),"char",e3.toString(),ta);       
+            :}
+         P_coma |    
+ Char Identificador:i3 Igual Numero:e3 Punto Numero:e2{:   
+            RESULT=i3.toString();
+            String nume=e3.toString()+"."+e2.toString();
+                   ta.verificarVariableInde(i3.toString(),"char",nume,ta); 
+            :}
+    P_coma |   
+    Char Identificador:i3 Igual Caracter:e3{:   
+            RESULT=i3.toString();
+            ta.crearEntradada(i3.toString(), "char");
+            ta.setValor(i3.toString(), e3.toString());        
+            :}
+    P_coma |
+
+Identificador:i3 Igual Caracter:e3 P_coma {:
+            RESULT=i3.toString();
+         ta.setValor(i3.toString(), e3.toString());
+:}
+;
+IF ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
+;
+SENTENCIA_BOOLEANA ::= 
+    Op_booleano | 
+    Identificador Op_relacional Op_booleano |
+    Identificador Op_relacional Numero |
+    Identificador Op_relacional Identificador |
+    Identificador Op_relacional Comillas Comillas |
+    Identificador Op_relacional Comillas Identificador Comillas
+;
+IF_ELSE ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c Else Llave_a SENTENCIA Llave_c
+;
+WHILE ::= While Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
+;
+DO_WHILE ::= Do Llave_a SENTENCIA Llave_c While Parentesis_a SENTENCIA_BOOLEANA Parentesis_c P_coma
+;
+FOR ::= For Parentesis_a SENTENCIA_FOR Parentesis_c Llave_a SENTENCIA Llave_c
+;
+SENTENCIA_FOR ::=
+    Int Identificador Igual Numero P_coma SENTENCIA_BOOLEANA P_coma DECLARACION_FOR |
+    Identificador Igual Numero P_coma SENTENCIA_BOOLEANA P_coma DECLARACION_FOR
+;
+DECLARACION_FOR ::= 
+    Identificador Op_atribucion Numero |
+    Identificador Op_incremento | 
+    Op_incremento Identificador
+;
