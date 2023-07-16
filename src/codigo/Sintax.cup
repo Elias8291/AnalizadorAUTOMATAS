@@ -4,11 +4,8 @@ import java_cup.runtime.Symbol;
     
 action code{:
     TablaSimbolos ta = new TablaSimbolos();   
-    Object entero=null;
-public Object getEntero() {
-        return this.entero;
-    }
-
+    Palabra simbolo;
+    
 :}
 
 parser code
@@ -32,6 +29,9 @@ parser code
     Op_atribucion, Op_incremento, Op_booleano, Parentesis_a, Parentesis_c,
     Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,
     Numero, Caracter, ERROR;
+terminal Integer INTEGER;
+terminal Float DECIMAL;
+terminal Character CHARACTER;
 non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, IF, IF_ELSE,
     WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR, METODO;
 
@@ -68,26 +68,41 @@ SENTENCIA ::=
 DECLARACION ::= 
     Int Identificador:i1 P_coma {:
             RESULT=i1.toString();
-            ta.crearEntradada(i1.toString(), "integer");
+            String  tipoTemporal = "integer";
+            ta.crearEntradada(i1.toString(), tipoTemporal);
             :} | 
-   Identificador:i1 Igual Numero:e1  {:
+    Identificador:i1 Igual Numero:e1 {:
+            simbolo = ta.busca(i1.toString());
             RESULT=i1.toString();
-            ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);      
+            if (simbolo != null && simbolo.getTipo().equals("integer")) {
+            ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
+            } else {
+            ta.imprimir(i1.toString());
+             }  
             :} P_coma|
-    
-            
+    Identificador:i2 Igual Caracter:e3 P_coma{:
+          simbolo = ta.busca(i2.toString());
+            RESULT=i2.toString();
+            if (simbolo != null && simbolo.getTipo().equals("char")) {
+            ta.verificarVariableDef(i2.toString(),"char",e3.toString(),ta);
+            } else {
+            ta.imprimirVeri(i2.toString());
+             }  
+         
+    :}|
+
     Identificador Igual Identificador Suma Identificador P_coma |
     Int Identificador Op_atribucion Numero P_coma |
     Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
              RESULT=i2.toString();
              String nume=e3.toString()+"."+e2.toString();
+             Palabra simbolo = ta.busca(i2.toString());
              ta.verificarVariableInde(i2.toString(),"integer",nume,ta);      
              :}P_coma | 
     Int Identificador:i1 Igual Numero:e1{:
             RESULT=i1.toString();
             ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
             :} P_coma |
-
     Int Identificador:i1 Igual Caracter:e1{:
             RESULT=i1.toString();
             ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
@@ -95,9 +110,11 @@ DECLARACION ::=
     Int Identificador Op_incremento P_coma | 
     Int Op_incremento Identificador P_coma | 
     Float Identificador:i2 P_coma{:
+           String  tipoTemporal = "float";
             RESULT=i2.toString();
-            ta.crearEntradada(i2.toString(), "float");
+            ta.crearEntradada(i2.toString(),tipoTemporal);
             :}|
+ 
  Float Identificador:i2 Igual Numero:e3 {:
         RESULT=i2.toString();
         ta.verificarVariableInde(i2.toString(),"float",e3.toString()+".0",ta);
@@ -112,11 +129,17 @@ Float Identificador:i2 Igual Caracter:e3 {:
         String nume=e3.toString()+"."+e2.toString();
         ta.verificarVariableInde(i2.toString(),"float",nume,ta);
         :}P_coma | 
-    Identificador:i2 Igual Numero:e3 Punto Numero:e2 P_coma {:
+    Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
         RESULT=i2.toString();
         String nume=e3.toString()+"."+e2.toString();
-        ta.setValor(i2.toString(),nume);
-        :}|
+        Palabra simbolos = ta.busca(i2.toString());
+    if (simbolos != null && simbolos.getTipo().equals("float")) {
+            ta.setValor(i2.toString(), nume);
+        } else{
+    ta.imprimirVeri(i2.toString());
+
+}
+        :} P_coma|
     Cadena Identificador Op_atribucion Comillas Comillas P_coma |
     Cadena Identificador Igual Comillas Comillas P_coma |
     Cadena Identificador Op_atribucion Comillas Identificador Comillas P_coma |
@@ -141,12 +164,7 @@ Float Identificador:i2 Igual Caracter:e3 {:
             ta.crearEntradada(i3.toString(), "char");
             ta.setValor(i3.toString(), e3.toString());        
             :}
-    P_coma |
-
-Identificador:i3 Igual Caracter:e3 P_coma {:
-            RESULT=i3.toString();
-         ta.setValor(i3.toString(), e3.toString());
-:}
+    P_coma 
 ;
 IF ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
 ;

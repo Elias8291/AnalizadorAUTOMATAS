@@ -13,6 +13,19 @@ public class TablaSimbolos {
 
     }
 
+    public static boolean crearEntrads(String nombre, String tipo) {
+        Palabra e = TablaSimbolos.busca(nombre);
+        if (e == null) {
+            e = new Palabra(nombre, tipo);
+            System.out.println("e" + e.getTipo());
+            tabla.add(e);
+            return true; // Devuelve true si la entrada fue creada con éxito
+        } else {
+            JOptionPane.showMessageDialog(null, "La Variable repetida es: " + e.getNombre());
+            return false; // Devuelve false si la entrada ya existía
+        }
+    }
+
     public static void crearEntradada(String nombre, String tipo) {
 
         Palabra e = TablaSimbolos.busca(nombre);
@@ -134,15 +147,13 @@ public class TablaSimbolos {
     public static boolean verificarValorT(String tipo, String valor) {
         try {
             if (tipo.equalsIgnoreCase("float")) {
-                
-                  Float.parseFloat(valor);
-            
-            
+
+                Float.parseFloat(valor);
             } else if (tipo.equalsIgnoreCase("integer")) {
                 Integer.parseInt(valor);
             } else if (tipo.equalsIgnoreCase("char")) {
-                 if (valor.length() == 3 && valor.charAt(0) == '\'' && valor.charAt(2) == '\'') {
-                char c = valor.charAt(1);
+                if (valor.length() == 3 && valor.charAt(0) == '\'' && valor.charAt(2) == '\'') {
+                    char c = valor.charAt(1);
                 } else {
                     return false;
                 }
@@ -155,25 +166,33 @@ public class TablaSimbolos {
         return true;
     }
 
-    public static void verificarVariableInde(String identificador,String tipo, String valor,TablaSimbolos a) {
-        System.out.println("tipo"+identificador);
-        System.out.println("valor"+valor);
+    public static void verificarVariableInde(String identificador, String tipo, String valor, TablaSimbolos a) {
+        System.out.println("tipo inde" + identificador);
+        System.out.println("valor" + valor);
         if (verificarValorT(tipo, valor)) {
             a.crearEntradada(identificador, tipo);
-            a.setValor(identificador,valor);
+            a.setValor(identificador, valor);
         } else {
             JOptionPane.showMessageDialog(null, "La variable: " + identificador + " no es de tipo: " + tipo);
         }
     }
-     public static void verificarVariableDef(String identificador,String tipo, String valor,TablaSimbolos a) {
-        System.out.println("tipo"+identificador);
-        System.out.println("valor"+valor);
+
+    public static void verificarVariableDef(String identificador, String tipo, String valor, TablaSimbolos a) {
+        System.out.println("tipo def" + identificador);
+        System.out.println("valor def" + valor);
         if (verificarValorT(tipo, valor)) {
-             System.out.println("paseee");
-            a.setValor(identificador,valor);
+            System.out.println("paseee");
+            a.setValor(identificador, valor);
         } else {
             JOptionPane.showMessageDialog(null, "La variable: " + identificador + " no es de tipo: " + tipo);
         }
+    }
+
+    public static void imprimir(String variable) {
+      JOptionPane.showMessageDialog(null, "La variable: "+variable+" no está definida", "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+    public static void imprimirVeri(String variable) {
+      JOptionPane.showMessageDialog(null, "La variable: "+variable+" no es tipo", "Advertencia", JOptionPane.WARNING_MESSAGE);
     }
 
 }
