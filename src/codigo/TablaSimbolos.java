@@ -188,11 +188,31 @@ public class TablaSimbolos {
         }
     }
 
-    public static void imprimir(String variable) {
-      JOptionPane.showMessageDialog(null, "La variable: "+variable+" no está definida", "Advertencia", JOptionPane.WARNING_MESSAGE);
+     public void probar(String variable, int caso,String dato) {
+     probar(variable,caso,dato,null,null);
+     }
+
+   public void probar(String variable, int caso,String dato,String varA, String varB) {
+    int messageType = JOptionPane.WARNING_MESSAGE; // Inicializar con un valor por defecto
+
+    switch (caso) {
+        case 1:
+            messageType = JOptionPane.WARNING_MESSAGE;
+            JOptionPane.showMessageDialog(null, "La variable: " + variable + " no está definida", "Advertencia", messageType);
+            break;
+        case 2:
+            messageType = JOptionPane.ERROR_MESSAGE;
+            JOptionPane.showMessageDialog(null, "La variable " + variable + " no es tipo de dato "+dato, "Error", messageType);
+            break;
+        case 3:
+            messageType = JOptionPane.INFORMATION_MESSAGE;
+            JOptionPane.showMessageDialog(null, "La variable " + varA + " y "+varB+" deben estar definidas","Información", messageType);
+            break;
+        case 4:
+            messageType = JOptionPane.WARNING_MESSAGE;
+            JOptionPane.showMessageDialog(null, "La variable " + varA + " y "+varB+" deben ser del mismo tipo","Advertencia", messageType);
+            break;
     }
-    public static void imprimirVeri(String variable) {
-      JOptionPane.showMessageDialog(null, "La variable: "+variable+" no es tipo", "Advertencia", JOptionPane.WARNING_MESSAGE);
-    }
+}
 
 }

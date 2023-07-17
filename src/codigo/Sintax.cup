@@ -75,23 +75,65 @@ DECLARACION ::=
             simbolo = ta.busca(i1.toString());
             RESULT=i1.toString();
             if (simbolo != null && simbolo.getTipo().equals("integer")) {
-            ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
+                 ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
             } else {
-            ta.imprimir(i1.toString());
+                if (simbolo == null) {
+                    ta.probar(i1.toString(), 1, null);
+                } else {
+                    ta.probar(i1.toString(), 2, simbolo.getTipo());
+                }
              }  
             :} P_coma|
+
     Identificador:i2 Igual Caracter:e3 P_coma{:
           simbolo = ta.busca(i2.toString());
             RESULT=i2.toString();
             if (simbolo != null && simbolo.getTipo().equals("char")) {
-            ta.verificarVariableDef(i2.toString(),"char",e3.toString(),ta);
+                ta.verificarVariableDef(i2.toString(),"char",e3.toString(),ta);
             } else {
-            ta.imprimirVeri(i2.toString());
-             }  
-         
+                if (simbolo == null) {
+                    ta.probar(i2.toString(), 1, null);
+                } else {
+                     ta.probar(i2.toString(), 2, simbolo.getTipo());
+                }
+           }          
     :}|
+     Identificador:i1 Igual Identificador:i2 P_coma {:
+        Palabra simbolo1 = ta.busca(i1.toString());
+        Palabra simbolo2 = ta.busca(i2.toString());
+        RESULT = i1.toString();
+            if (simbolo2 == null) {
+                ta.probar(i2.toString(), 1, null);
+            } else {
+            if (simbolo1 != null) {
+                if (simbolo2.getTipo().equals(simbolo1.getTipo())) {
+                    ta.setValor(i1.toString(), simbolo2.getValor());
+                 } else {
+                    ta.probar(i1.toString(), 4, null, i1.toString(), i2.toString());
+                 }
+                } else {
+                    ta.probar(i1.toString(), 1, null);
+                }
+            }
+        :}|
 
-    Identificador Igual Identificador Suma Identificador P_coma |
+    Identificador:i1 Igual Identificador:i2 Suma Identificador:i3 P_coma{:
+     String varA = i2.toString();
+     String varB = i3.toString();
+     Palabra simboloA = ta.busca(varA);
+     Palabra simboloB = ta.busca(varB);
+
+        if (simboloA == null || simboloB == null) {
+            ta.probar(null,3,null,varA,varB);
+        } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
+            ta.probar(null,4,null,varA,varB);
+        } else {
+        RESULT = i1.toString();
+        
+    }
+
+
+:} |
     Int Identificador Op_atribucion Numero P_coma |
     Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
              RESULT=i2.toString();
@@ -121,8 +163,19 @@ DECLARACION ::=
         :}P_coma | 
 
 Float Identificador:i2 Igual Caracter:e3 {:
-        RESULT=i2.toString();
-        ta.verificarVariableInde(i2.toString(),"float",e3.toString(),ta);
+       RESULT = i2.toString();
+    String value = e3.toString();
+
+    if (value.length() == 3 && value.startsWith("'") && value.endsWith("'")) {
+        char c = value.charAt(1);
+        if (Character.isDigit(c)) {
+            ta.verificarVariableInde(i2.toString(), "float", value, ta);
+        } else {
+            ta.probar(value, 2, "char");
+        }
+    } else {
+        ta.probar(value, 2, "char");
+    }
         :}P_coma | 
     Float Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
         RESULT=i2.toString();
@@ -136,7 +189,7 @@ Float Identificador:i2 Igual Caracter:e3 {:
     if (simbolos != null && simbolos.getTipo().equals("float")) {
             ta.setValor(i2.toString(), nume);
         } else{
-    ta.imprimirVeri(i2.toString());
+    ta.probar(i2.toString(),2,simbolos.getTipo());
 
 }
         :} P_coma|
