@@ -4,25 +4,27 @@ import java_cup.runtime.Symbol;
     
 action code{:
     TablaSimbolos ta = new TablaSimbolos();   
+    Object entero=null;
     Palabra simbolo;
-    
+    public Object getEntero() {
+        return this.entero;
+    }
+
 :}
 
 parser code
-{: 
+{:
     private Symbol s;
-    private TablaSimbolos ta ;
+    
     public void syntax_error(Symbol s){
         this.s = s;
     }
 
-
     public Symbol getS(){
         return this.s;
 }
-
-
 :};
+
 
  terminal Linea, Comillas, Int, Float, Punto, Char, Cadena, If, Else, Do, While, For, Main, Clase, Publico, Void,
     Igual, Suma, Resta, Multiplicacion, Division, Op_logico, Op_relacional,

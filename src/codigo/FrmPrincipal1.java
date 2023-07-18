@@ -526,6 +526,14 @@ public class FrmPrincipal1 extends javax.swing.JFrame {
             sintactico.setText("Error de sintaxis. Linea: " + (sym.right + 1) + " Columna: " + (sym.left + 1) + ", Texto: \"" + sym.value + "\"");
             sintactico.setForeground(Color.red);
         }
+        
+        
+        
+        
+        
+        
+        
+        
 
 // TODO add your handling code here:
     }//GEN-LAST:event_analizaSinActionPerformed
