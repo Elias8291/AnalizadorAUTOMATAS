@@ -1,14 +1,14 @@
 package codigo;
 
 import java_cup.runtime.Symbol;
-    
+import java.util.List;    
 action code{:
-    TablaSimbolos ta = new TablaSimbolos();   
+    TablaSimbolos ta = new TablaSimbolos();  
     Object entero=null;
     Palabra simbolo;
-    public Object getEntero() {
-        return this.entero;
-    }
+    TablaIntermedio codigoIntermedio=new TablaIntermedio();
+    int temp = 1;
+   
 
 :}
 
@@ -16,13 +16,15 @@ parser code
 {:
     private Symbol s;
     
+    
     public void syntax_error(Symbol s){
         this.s = s;
     }
 
     public Symbol getS(){
         return this.s;
-}
+    }
+
 :};
 
 
@@ -71,13 +73,17 @@ DECLARACION ::=
     Int Identificador:i1 P_coma {:
             RESULT=i1.toString();
             String  tipoTemporal = "integer";
-            ta.crearEntradada(i1.toString(), tipoTemporal);
+                ta.crearEntradada(i1.toString(), tipoTemporal);
+                codigoIntermedio.crearEntrada(new Quadruple("",i1.toString(), "", ""));
             :} | 
     Identificador:i1 Igual Numero:e1 {:
             simbolo = ta.busca(i1.toString());
             RESULT=i1.toString();
             if (simbolo != null && simbolo.getTipo().equals("integer")) {
                  ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
+
+                 codigoIntermedio.setValor(i1.toString(),"=",i1.toString(),e1.toString(),"");
+           
             } else {
                 if (simbolo == null) {
                     ta.probar(i1.toString(), 1, null);
@@ -119,23 +125,50 @@ DECLARACION ::=
             }
         :}|
 
-    Identificador:i1 Igual Identificador:i2 Suma Identificador:i3 P_coma{:
-     String varA = i2.toString();
-     String varB = i3.toString();
-     Palabra simboloA = ta.busca(varA);
-     Palabra simboloB = ta.busca(varB);
+   Identificador:i1 Igual Identificador:i2 Suma Identificador:i3 P_coma{:
+    String varA = i2.toString();
+    String varB = i3.toString();
+    Palabra simboloA = ta.busca(varA);
+    Palabra simboloB = ta.busca(varB);
+    String tempResult = "temp" + temp;  // Use temp variable
 
-        if (simboloA == null || simboloB == null) {
-            ta.probar(null,3,null,varA,varB);
-        } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
-            ta.probar(null,4,null,varA,varB);
-        } else {
+    if (simboloA == null || simboloB == null) {
+        ta.probar(null,3,null,varA,varB);
+    } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
+        ta.probar(null,4,null,varA,varB);
+    } else {
         RESULT = i1.toString();
-        
+
+        // First create the quadruple for the addition
+        codigoIntermedio.crearEntrada(new Quadruple("+", tempResult, varA, varB));
+        temp += 1;  // Increment temp
+
+        // Then create the quadruple for the result assignment
+        codigoIntermedio.crearEntrada(new Quadruple("=", i1.toString(), tempResult, ""));
     }
-
-
 :} |
+   Identificador:i1 Igual Identificador:i2 Resta Identificador:i3 P_coma{:
+    String varA = i2.toString();
+    String varB = i3.toString();
+    Palabra simboloA = ta.busca(varA);
+    Palabra simboloB = ta.busca(varB);
+    String tempResult = "temp" + temp;  // Use temp variable
+
+    if (simboloA == null || simboloB == null) {
+        ta.probar(null,3,null,varA,varB);
+    } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
+        ta.probar(null,4,null,varA,varB);
+    } else {
+        RESULT = i1.toString();
+
+        // First create the quadruple for the addition
+        codigoIntermedio.crearEntrada(new Quadruple("-", tempResult, varA, varB));
+        temp += 1;  // Increment temp
+
+        // Then create the quadruple for the result assignment
+        codigoIntermedio.crearEntrada(new Quadruple("=", i1.toString(), tempResult, ""));
+    }
+:}|
     Int Identificador Op_atribucion Numero P_coma |
     Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
              RESULT=i2.toString();
@@ -145,7 +178,8 @@ DECLARACION ::=
              :}P_coma | 
     Int Identificador:i1 Igual Numero:e1{:
             RESULT=i1.toString();
-            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
+            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);    
+            codigoIntermedio.crearEntrada(new Quadruple("=",i1.toString(),e1.toString(), ""));
             :} P_coma |
     Int Identificador:i1 Igual Caracter:e1{:
             RESULT=i1.toString();
@@ -184,16 +218,19 @@ Float Identificador:i2 Igual Caracter:e3 {:
         String nume=e3.toString()+"."+e2.toString();
         ta.verificarVariableInde(i2.toString(),"float",nume,ta);
         :}P_coma | 
+
+    
     Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
         RESULT=i2.toString();
         String nume=e3.toString()+"."+e2.toString();
         Palabra simbolos = ta.busca(i2.toString());
-    if (simbolos != null && simbolos.getTipo().equals("float")) {
+          if (simbolos != null && simbolos.getTipo().equals("float")) {
             ta.setValor(i2.toString(), nume);
-        } else{
-    ta.probar(i2.toString(),2,simbolos.getTipo());
+            
 
-}
+           } else{
+              ta.probar(i2.toString(),2,simbolos.getTipo());
+            }
         :} P_coma|
     Cadena Identificador Op_atribucion Comillas Comillas P_coma |
     Cadena Identificador Igual Comillas Comillas P_coma |
@@ -208,7 +245,7 @@ Float Identificador:i2 Igual Caracter:e3 {:
             ta.verificarVariableInde(i3.toString(),"char",e3.toString(),ta);       
             :}
          P_coma |    
- Char Identificador:i3 Igual Numero:e3 Punto Numero:e2{:   
+    Char Identificador:i3 Igual Numero:e3 Punto Numero:e2{:   
             RESULT=i3.toString();
             String nume=e3.toString()+"."+e2.toString();
                    ta.verificarVariableInde(i3.toString(),"char",nume,ta); 
