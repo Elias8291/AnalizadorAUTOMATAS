@@ -10,7 +10,8 @@ import java_cup.runtime.Symbol;
 L=[a-zA-Z_]+
 D=[0-9]+
 espacio=[ ,\t,\r,\n]+
-carac = (.)
+carac = (.)+
+StringLiteral = \"([^\"\\]|\\.)*\"
 %{
     private Symbol symbol(int type, Object value){
         return new Symbol(type, yyline, yycolumn, value);
@@ -124,14 +125,19 @@ carac = (.)
 /* Punto y coma */
 ( ";" ) {return new Symbol(sym.P_coma, yychar, yyline, yytext());}
 
-/* Identificador */
-{L}({L}|{D})* {return new Symbol(sym.Identificador, yychar, yyline, yytext());}
+{L}({L}|{D}|\s)* {return new Symbol(sym.Identificador, yychar, yyline, yytext());}
+
 
 /* Numero */
 ("(-"{D}+")")|{D}+ {return new Symbol(sym.Numero, yychar, yyline, yytext());}
 
 /* Caracter */
 "'" . "'" {return new Symbol(sym.Caracter, yychar, yyline, yytext());}
+
+/* SOUT */
+( "System.out.println" ) {return new Symbol(sym.SystemOutPrintln, yychar, yyline, yytext());}
+
+{StringLiteral} { return symbol(sym.StringLiteral, yytext()); }
 
 /* Error de analisis */
  . {return new Symbol(sym.ERROR, yychar, yyline, yytext());}

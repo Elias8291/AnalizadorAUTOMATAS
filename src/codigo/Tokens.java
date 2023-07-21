@@ -47,5 +47,6 @@ public enum Tokens {
     Identificador,
     Numero,
     Caracter,
+    SystemOutPrintln,
     ERROR
 }

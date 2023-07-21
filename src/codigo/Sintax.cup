@@ -8,22 +8,29 @@ action code{:
     Palabra simbolo;
     TablaIntermedio codigoIntermedio=new TablaIntermedio();
     int temp = 1;
-   
-
 :}
 
 parser code
 {:
+
     private Symbol s;
+    private String error;
     
     
     public void syntax_error(Symbol s){
         this.s = s;
+        this.error = "Syntax error at line " + (s.right + 1) + ", column " + (s.left + 1) + ".";
+   
     }
 
     public Symbol getS(){
         return this.s;
     }
+
+ public String getError(){
+        return this.error;
+    }
+
 
 :};
 
@@ -31,11 +38,12 @@ parser code
  terminal Linea, Comillas, Int, Float, Punto, Char, Cadena, If, Else, Do, While, For, Main, Clase, Publico, Void,
     Igual, Suma, Resta, Multiplicacion, Division, Op_logico, Op_relacional,
     Op_atribucion, Op_incremento, Op_booleano, Parentesis_a, Parentesis_c,
-    Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,
+    Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,SystemOutPrintln,
     Numero, Caracter, ERROR;
 terminal Integer INTEGER;
 terminal Float DECIMAL;
 terminal Character CHARACTER;
+terminal StringLiteral;
 non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, IF, IF_ELSE,
     WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR, METODO;
 
@@ -56,6 +64,7 @@ METODO ::=
 ;
 
 SENTENCIA ::= 
+   
     SENTENCIA DECLARACION |
     DECLARACION |
     SENTENCIA IF | 
@@ -74,16 +83,14 @@ DECLARACION ::=
             RESULT=i1.toString();
             String  tipoTemporal = "integer";
                 ta.crearEntradada(i1.toString(), tipoTemporal);
-                codigoIntermedio.crearEntrada(new Quadruple("",i1.toString(), "", ""));
+                codigoIntermedio.crearEntrada(new Quadruple("Variable",i1.toString(), "", ""));
             :} | 
     Identificador:i1 Igual Numero:e1 {:
             simbolo = ta.busca(i1.toString());
             RESULT=i1.toString();
             if (simbolo != null && simbolo.getTipo().equals("integer")) {
                  ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
-
-                 codigoIntermedio.setValor(i1.toString(),"=",i1.toString(),e1.toString(),"");
-           
+                 codigoIntermedio.setValor(i1.toString(),"=",i1.toString(),e1.toString(),"");          
             } else {
                 if (simbolo == null) {
                     ta.probar(i1.toString(), 1, null);
@@ -152,7 +159,7 @@ DECLARACION ::=
     String varB = i3.toString();
     Palabra simboloA = ta.busca(varA);
     Palabra simboloB = ta.busca(varB);
-    String tempResult = "temp" + temp;  // Use temp variable
+    String tempResult = "temp " + temp;  // Use temp variable
 
     if (simboloA == null || simboloB == null) {
         ta.probar(null,3,null,varA,varB);
@@ -192,7 +199,13 @@ DECLARACION ::=
             RESULT=i2.toString();
             ta.crearEntradada(i2.toString(),tipoTemporal);
             :}|
- 
+  SystemOutPrintln Parentesis_a StringLiteral:s Parentesis_c P_coma {:
+        codigoIntermedio.crearEntrada(new Quadruple("SystemOutPrintln", s.toString(), "", ""));
+    :}|
+
+ SystemOutPrintln Parentesis_a Identificador:i1 Parentesis_c P_coma {:
+        codigoIntermedio.crearEntrada(new Quadruple("SystemOutPrintln", i1.toString(), "", ""));
+    :}|
  Float Identificador:i2 Igual Numero:e3 {:
         RESULT=i2.toString();
         ta.verificarVariableInde(i2.toString(),"float",e3.toString()+".0",ta);

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 class Quadruple {
 
     String operator;
@@ -19,20 +18,24 @@ class Quadruple {
         this.operand2 = operand2;
 
     }
+
     @Override
-public boolean equals(Object obj) {
-    if (this == obj) return true;
-    if (obj == null || getClass() != obj.getClass()) return false;
-    Quadruple quadruple = (Quadruple) obj;
-    return Objects.equals(operand1, quadruple.operand1) &&
-           Objects.equals(operand2, quadruple.operand2);
-}
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        Quadruple quadruple = (Quadruple) obj;
+        return Objects.equals(operand1, quadruple.operand1)
+                && Objects.equals(operand2, quadruple.operand2);
+    }
 
-@Override
-public int hashCode() {
-    return Objects.hash(operand1, operand2);
-}
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(operand1, operand2);
+    }
 
     @Override
     public String toString() {

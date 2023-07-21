@@ -51,6 +51,9 @@ carac= (.)
 /* Palabra reservada Do */
 ( do ) {lexeme=yytext(); return Do;}
 
+/* Palabra reservada sout*/
+( "System.out.println" ) {lexeme=yytext(); return SystemOutPrintln;}
+
 /* Palabra reservada While */
 ( while ) {lexeme=yytext(); return While;}
 
