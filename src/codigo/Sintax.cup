@@ -19,10 +19,9 @@ parser code
     
     public void syntax_error(Symbol s){
         this.s = s;
-        this.error = "Syntax error at line " + (s.right + 1) + ", column " + (s.left + 1) + ".";
-   
+        this.error = "Syntax error at line " + (s.right + 1) + ", column " + (s.left + 1) + ". Value: " + s.value;
     }
-
+   
     public Symbol getS(){
         return this.s;
     }
@@ -90,7 +89,7 @@ DECLARACION ::=
             RESULT=i1.toString();
             if (simbolo != null && simbolo.getTipo().equals("integer")) {
                  ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
-                 codigoIntermedio.setValor(i1.toString(),"=",i1.toString(),e1.toString(),"");          
+                codigoIntermedio.agregarValor("=",i1.toString(),e1.toString(),"");              
             } else {
                 if (simbolo == null) {
                     ta.probar(i1.toString(), 1, null);
@@ -200,11 +199,11 @@ DECLARACION ::=
             ta.crearEntradada(i2.toString(),tipoTemporal);
             :}|
   SystemOutPrintln Parentesis_a StringLiteral:s Parentesis_c P_coma {:
-        codigoIntermedio.crearEntrada(new Quadruple("SystemOutPrintln", s.toString(), "", ""));
+        codigoIntermedio.crearEntrada(new Quadruple("Print", s.toString(), "", ""));
     :}|
 
  SystemOutPrintln Parentesis_a Identificador:i1 Parentesis_c P_coma {:
-        codigoIntermedio.crearEntrada(new Quadruple("SystemOutPrintln", i1.toString(), "", ""));
+        codigoIntermedio.crearEntrada(new Quadruple("Print", i1.toString(), "", ""));
     :}|
  Float Identificador:i2 Igual Numero:e3 {:
         RESULT=i2.toString();

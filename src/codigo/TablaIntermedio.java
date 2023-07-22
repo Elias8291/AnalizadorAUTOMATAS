@@ -43,6 +43,8 @@ public class TablaIntermedio {
     }
 
     public static void setValor(String oldResult, String newOperator, String newResult, String newOperand1, String newOperand2) {
+        
+        
         for (int i = 0; i < tabla.size(); i++) {
             Quadruple quad = tabla.elementAt(i);
             if (quad.result.equals(oldResult)) {
@@ -55,6 +57,10 @@ public class TablaIntermedio {
             }
         }
     }
+    public static void agregarValor(String operator, String result, String operand1, String operand2) {
+    Quadruple quad = new Quadruple(operator, result, operand1, operand2);
+    tabla.add(quad);
+}
 
     public static int getTablaSize() {
         return tabla.size();
