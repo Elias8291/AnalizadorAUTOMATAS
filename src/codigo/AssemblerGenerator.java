@@ -33,9 +33,11 @@ public class AssemblerGenerator {
 
             switch (opcode) {
                 case "=":
-                    if (arg2.isEmpty()) {
-                        String value = arg1;  // El valor es el primer operando
-                        dataSection.append(result + " dw " + value + "\n");
+                   
+                    // Update the value of the variable in the data section
+                    int index = dataSection.indexOf(result + " dw ?");
+                    if (index != -1) {
+                        dataSection.replace(index, index + result.length() + 5, result + " dw " + arg1);
                     }
                     break;
                 case "+":
@@ -83,7 +85,9 @@ public class AssemblerGenerator {
                     codeSection.append("mov ah, 02h\n");
                     codeSection.append("int 21h\n");
                     break;
-
+                case "Variable": // Handle variable initialization
+                    dataSection.append(result + " dw ?\n");
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown opcode: " + opcode);
             }
