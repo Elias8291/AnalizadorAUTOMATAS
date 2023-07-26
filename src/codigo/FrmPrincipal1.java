@@ -627,6 +627,7 @@ public class FrmPrincipal1 extends javax.swing.JFrame {
         generator.writeToFile(assemblyCode, "C:/Users/Abisai/Documents/pp/AnalizadorLexico/archivo.asm");
         // Imprimir el código de ensamblador
         System.out.println(assemblyCode);
+        
     }//GEN-LAST:event_analizarTodo1ActionPerformed
 
     public void probando() {
