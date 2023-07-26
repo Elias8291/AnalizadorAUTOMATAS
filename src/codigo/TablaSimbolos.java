@@ -20,7 +20,6 @@ public class TablaSimbolos {
             e = new Palabra(nombre, tipo);
             System.out.println("e" + e.getTipo());
             tabla.add(e);
-
         } else {
             JOptionPane.showMessageDialog(null, "La Variable repetida es: " + e.getNombre());
         }

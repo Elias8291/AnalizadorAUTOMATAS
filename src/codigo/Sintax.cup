@@ -1,4 +1,5 @@
 package codigo;
+import javax.swing.JOptionPane;
 
 import java_cup.runtime.Symbol;
 import java.util.List;    
@@ -12,7 +13,7 @@ action code{:
 
 parser code
 {:
-
+    
     private Symbol s;
     private String error;
     
@@ -21,30 +22,29 @@ parser code
         this.s = s;
         this.error = "Syntax error at line " + (s.right + 1) + ", column " + (s.left + 1) + ". Value: " + s.value;
     }
-   
+    
     public Symbol getS(){
         return this.s;
     }
-
- public String getError(){
+    
+    public String getError(){
         return this.error;
     }
-
-
+    
+    
 :};
 
-
- terminal Linea, Comillas, Int, Float, Punto, Char, Cadena, If, Else, Do, While, For, Main, Clase, Publico, Void,
-    Igual, Suma, Resta, Multiplicacion, Division, Op_logico, Op_relacional,
-    Op_atribucion, Op_incremento, Op_booleano, Parentesis_a, Parentesis_c,
-    Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,SystemOutPrintln,
-    Numero, Caracter, ERROR;
+terminal Linea, Comillas, Int, Float, Punto, Char, Cadena, If, Else, Do, While, For, Main, Clase, Publico, Void,
+Igual, Suma, Resta, Multiplicacion, Division, Op_logico, Op_relacional,
+Op_atribucion, Op_incremento, Op_booleano, Parentesis_a, Parentesis_c,
+Llave_a, Llave_c, Corchete_a, Corchete_c, P_coma, Identificador,SystemOutPrintln,
+Numero, Caracter, ERROR;
 terminal Integer INTEGER;
 terminal Float DECIMAL;
 terminal Character CHARACTER;
 terminal StringLiteral;
 non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, IF, IF_ELSE,
-    WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR, METODO;
+WHILE, DO_WHILE, FOR, SENTENCIA_BOOLEANA, SENTENCIA_FOR, METODO;
 
 start with INICIO;
 
@@ -63,7 +63,6 @@ METODO ::=
 ;
 
 SENTENCIA ::= 
-   
     SENTENCIA DECLARACION |
     DECLARACION |
     SENTENCIA IF | 
@@ -77,198 +76,194 @@ SENTENCIA ::=
     SENTENCIA FOR |
     FOR
 ;
-DECLARACION ::= 
-    Int Identificador:i1 P_coma {:
-            RESULT=i1.toString();
-            String  tipoTemporal = "integer";
-                ta.crearEntradada(i1.toString(), tipoTemporal);
-                codigoIntermedio.crearEntrada(new Quadruple("Variable",i1.toString(), "", ""));
-            :} | 
-    Identificador:i1 Igual Numero:e1 {:
-            simbolo = ta.busca(i1.toString());
-            RESULT=i1.toString();
-            if (simbolo != null && simbolo.getTipo().equals("integer")) {
-                 ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
-                codigoIntermedio.agregarValor("=",i1.toString(),e1.toString(),"");              
+DECLARACION ::=
+Int Identificador:i1 P_coma {:
+    RESULT=i1.toString();
+    if (ta.busca(i1.toString()) == null) {
+        ta.crearEntradada(i1.toString(), "integer");
+        codigoIntermedio.crearEntrada(new Quadruple("Variable",i1.toString(), "", ""));
+        } else {
+        JOptionPane.showMessageDialog(null, "La Variable repetida es: "+ i1.toString());
+    }
+:} |
+Identificador:i1 Igual Numero:e1 {:
+    simbolo = ta.busca(i1.toString());
+    RESULT=i1.toString();
+    if (simbolo != null && simbolo.getTipo().equals("integer")) {
+        ta.verificarVariableDef(i1.toString(),"integer",e1.toString(),ta);
+        codigoIntermedio.agregarValor("=",i1.toString(),e1.toString(),"");
+        } else {
+        if (simbolo == null) {
+            ta.probar(i1.toString(), 1, null);
             } else {
-                if (simbolo == null) {
-                    ta.probar(i1.toString(), 1, null);
-                } else {
-                    ta.probar(i1.toString(), 2, simbolo.getTipo());
-                }
-             }  
-            :} P_coma|
-
-    Identificador:i2 Igual Caracter:e3 P_coma{:
-          simbolo = ta.busca(i2.toString());
-            RESULT=i2.toString();
-            if (simbolo != null && simbolo.getTipo().equals("char")) {
-                ta.verificarVariableDef(i2.toString(),"char",e3.toString(),ta);
+            ta.probar(i1.toString(), 2, simbolo.getTipo());
+        }
+    }
+:} P_coma|
+Identificador:i2 Igual Caracter:e3 P_coma{:
+    simbolo = ta.busca(i2.toString());
+    RESULT=i2.toString();
+    if (simbolo != null && simbolo.getTipo().equals("char")) {
+        ta.verificarVariableDef(i2.toString(),"char",e3.toString(),ta);
+        } else {
+        if (simbolo == null) {
+            ta.probar(i2.toString(), 1, null);
             } else {
-                if (simbolo == null) {
-                    ta.probar(i2.toString(), 1, null);
+            ta.probar(i2.toString(), 2, simbolo.getTipo());
+        }
+    }
+:}|
+ Identificador:i1 Igual Identificador:i2 P_coma {:
+    Palabra simbolo1 = ta.busca(i1.toString());
+    Palabra simbolo2 = ta.busca(i2.toString());
+    RESULT = i1.toString();
+    if (simbolo2 == null) {
+        ta.probar(i2.toString(), 1, null);
+        } else {
+        if (simbolo1 != null) {
+            if (simbolo2.getTipo().equals(simbolo1.getTipo())) {
+                ta.setValor(i1.toString(), simbolo2.getValor());
                 } else {
-                     ta.probar(i2.toString(), 2, simbolo.getTipo());
-                }
-           }          
-    :}|
-     Identificador:i1 Igual Identificador:i2 P_coma {:
-        Palabra simbolo1 = ta.busca(i1.toString());
-        Palabra simbolo2 = ta.busca(i2.toString());
-        RESULT = i1.toString();
-            if (simbolo2 == null) {
-                ta.probar(i2.toString(), 1, null);
-            } else {
-            if (simbolo1 != null) {
-                if (simbolo2.getTipo().equals(simbolo1.getTipo())) {
-                    ta.setValor(i1.toString(), simbolo2.getValor());
-                 } else {
-                    ta.probar(i1.toString(), 4, null, i1.toString(), i2.toString());
-                 }
-                } else {
-                    ta.probar(i1.toString(), 1, null);
-                }
+                ta.probar(i1.toString(), 4, null, i1.toString(), i2.toString());
             }
-        :}|
-
-   Identificador:i1 Igual Identificador:i2 Suma Identificador:i3 P_coma{:
+            } else {
+            ta.probar(i1.toString(), 1, null);
+        }
+    }
+:}|
+Identificador:i1 Igual Identificador:i2 Suma Identificador:i3 P_coma{:
     String varA = i2.toString();
     String varB = i3.toString();
     Palabra simboloA = ta.busca(varA);
     Palabra simboloB = ta.busca(varB);
     String tempResult = "temp" + temp;  // Use temp variable
-
+    
     if (simboloA == null || simboloB == null) {
         ta.probar(null,3,null,varA,varB);
-    } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
+        } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
         ta.probar(null,4,null,varA,varB);
-    } else {
+        } else {
         RESULT = i1.toString();
-
-        // First create the quadruple for the addition
+        
         codigoIntermedio.crearEntrada(new Quadruple("+", tempResult, varA, varB));
-        temp += 1;  // Increment temp
-
-        // Then create the quadruple for the result assignment
+        temp += 1;
         codigoIntermedio.crearEntrada(new Quadruple("=", i1.toString(), tempResult, ""));
     }
 :} |
-   Identificador:i1 Igual Identificador:i2 Resta Identificador:i3 P_coma{:
+Identificador:i1 Igual Identificador:i2 Resta Identificador:i3 P_coma{:
     String varA = i2.toString();
     String varB = i3.toString();
     Palabra simboloA = ta.busca(varA);
     Palabra simboloB = ta.busca(varB);
-    String tempResult = "temp " + temp;  // Use temp variable
-
+    String tempResult = "temp" + temp;  // Use temp variable
+    
     if (simboloA == null || simboloB == null) {
         ta.probar(null,3,null,varA,varB);
-    } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
+        } else if (!simboloA.getTipo().equals(simboloB.getTipo())) {
         ta.probar(null,4,null,varA,varB);
-    } else {
+        } else {
         RESULT = i1.toString();
-
-        // First create the quadruple for the addition
         codigoIntermedio.crearEntrada(new Quadruple("-", tempResult, varA, varB));
-        temp += 1;  // Increment temp
-
-        // Then create the quadruple for the result assignment
+        temp += 1;
         codigoIntermedio.crearEntrada(new Quadruple("=", i1.toString(), tempResult, ""));
     }
 :}|
-    Int Identificador Op_atribucion Numero P_coma |
-    Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
-             RESULT=i2.toString();
-             String nume=e3.toString()+"."+e2.toString();
-             Palabra simbolo = ta.busca(i2.toString());
-             ta.verificarVariableInde(i2.toString(),"integer",nume,ta);      
-             :}P_coma | 
-    Int Identificador:i1 Igual Numero:e1{:
-            RESULT=i1.toString();
-            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);    
-            codigoIntermedio.crearEntrada(new Quadruple("=",i1.toString(),e1.toString(), ""));
-            :} P_coma |
-    Int Identificador:i1 Igual Caracter:e1{:
-            RESULT=i1.toString();
-            ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);          
-            :} P_coma |
-    Int Identificador Op_incremento P_coma | 
-    Int Op_incremento Identificador P_coma | 
-    Float Identificador:i2 P_coma{:
-           String  tipoTemporal = "float";
-            RESULT=i2.toString();
-            ta.crearEntradada(i2.toString(),tipoTemporal);
-            :}|
-  SystemOutPrintln Parentesis_a StringLiteral:s Parentesis_c P_coma {:
-        codigoIntermedio.crearEntrada(new Quadruple("Print", s.toString(), "", ""));
-    :}|
+Int Identificador Op_atribucion Numero P_coma |
+Int Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
+    RESULT=i2.toString();
+    String nume=e3.toString()+"."+e2.toString();
+    Palabra simbolo = ta.busca(i2.toString());
+    ta.verificarVariableInde(i2.toString(),"integer",nume,ta);
+:}P_coma |
+Int Identificador:i1 Igual Numero:e1{:
+    RESULT=i1.toString();
+    ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);
+    codigoIntermedio.crearEntrada(new Quadruple("=",i1.toString(),e1.toString(), ""));
+:} P_coma |
+Int Identificador:i1 Igual Caracter:e1{:
+    RESULT=i1.toString();
+    ta.verificarVariableInde(i1.toString(),"integer",e1.toString(),ta);
+:} P_coma |
+Int Identificador Op_incremento P_coma |
+Int Op_incremento Identificador P_coma |
+Float Identificador:i2 P_coma{:
+     RESULT=i2.toString();
+     if (ta.busca(i2.toString()) == null) {
+        ta.crearEntradada(i2.toString(), "float");
+        codigoIntermedio.crearEntrada(new Quadruple("Variable",i2.toString(), "", ""));
+        } else {
+        JOptionPane.showMessageDialog(null, "La Variable repetida es: "+ i2.toString());
+     }
+:}|
+SystemOutPrintln Parentesis_a StringLiteral:s Parentesis_c P_coma {:
+    codigoIntermedio.crearEntrada(new Quadruple("Print", s.toString(), "", ""));
+:}|
 
- SystemOutPrintln Parentesis_a Identificador:i1 Parentesis_c P_coma {:
-        codigoIntermedio.crearEntrada(new Quadruple("Print", i1.toString(), "", ""));
-    :}|
+SystemOutPrintln Parentesis_a Identificador:i1 Parentesis_c P_coma {:
+    codigoIntermedio.crearEntrada(new Quadruple("PrintV", i1.toString(), "", ""));
+:}|
  Float Identificador:i2 Igual Numero:e3 {:
-        RESULT=i2.toString();
-        ta.verificarVariableInde(i2.toString(),"float",e3.toString()+".0",ta);
-        :}P_coma | 
+    RESULT=i2.toString();
+    ta.verificarVariableInde(i2.toString(),"float",e3.toString()+".0",ta);
+:}P_coma |
 
 Float Identificador:i2 Igual Caracter:e3 {:
-       RESULT = i2.toString();
+    RESULT = i2.toString();
     String value = e3.toString();
-
+    
     if (value.length() == 3 && value.startsWith("'") && value.endsWith("'")) {
         char c = value.charAt(1);
         if (Character.isDigit(c)) {
             ta.verificarVariableInde(i2.toString(), "float", value, ta);
-        } else {
+            } else {
             ta.probar(value, 2, "char");
         }
-    } else {
+        } else {
         ta.probar(value, 2, "char");
     }
-        :}P_coma | 
-    Float Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
-        RESULT=i2.toString();
-        String nume=e3.toString()+"."+e2.toString();
-        ta.verificarVariableInde(i2.toString(),"float",nume,ta);
-        :}P_coma | 
-
-    
-    Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
-        RESULT=i2.toString();
-        String nume=e3.toString()+"."+e2.toString();
-        Palabra simbolos = ta.busca(i2.toString());
-          if (simbolos != null && simbolos.getTipo().equals("float")) {
-            ta.setValor(i2.toString(), nume);
-            
-
-           } else{
-              ta.probar(i2.toString(),2,simbolos.getTipo());
-            }
-        :} P_coma|
-    Cadena Identificador Op_atribucion Comillas Comillas P_coma |
-    Cadena Identificador Igual Comillas Comillas P_coma |
-    Cadena Identificador Op_atribucion Comillas Identificador Comillas P_coma |
-    Cadena Identificador Igual Comillas Identificador Comillas P_coma |
-    Char Identificador:i3 P_coma{:
-            RESULT=i3.toString();
-            ta.crearEntradada(i3.toString(), "char");
-            :}|
-    Char Identificador:i3 Igual Numero:e3{:   
-            RESULT=i3.toString();
-            ta.verificarVariableInde(i3.toString(),"char",e3.toString(),ta);       
-            :}
-         P_coma |    
-    Char Identificador:i3 Igual Numero:e3 Punto Numero:e2{:   
-            RESULT=i3.toString();
-            String nume=e3.toString()+"."+e2.toString();
-                   ta.verificarVariableInde(i3.toString(),"char",nume,ta); 
-            :}
-    P_coma |   
-    Char Identificador:i3 Igual Caracter:e3{:   
-            RESULT=i3.toString();
-            ta.crearEntradada(i3.toString(), "char");
-            ta.setValor(i3.toString(), e3.toString());        
-            :}
-    P_coma 
+:}P_coma |
+Float Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
+    RESULT=i2.toString();
+    String nume=e3.toString()+"."+e2.toString();
+    ta.verificarVariableInde(i2.toString(),"float",nume,ta);
+:}P_coma |
+Identificador:i2 Igual Numero:e3 Punto Numero:e2 {:
+    RESULT=i2.toString();
+    String nume=e3.toString()+"."+e2.toString();
+    Palabra simbolos = ta.busca(i2.toString());
+    if (simbolos != null && simbolos.getTipo().equals("float")) {
+        ta.setValor(i2.toString(), nume);
+        
+        
+        } else{
+        ta.probar(i2.toString(),2,simbolos.getTipo());
+    }
+:} P_coma|
+Cadena Identificador Op_atribucion Comillas Comillas P_coma |
+Cadena Identificador Igual Comillas Comillas P_coma |
+Cadena Identificador Op_atribucion Comillas Identificador Comillas P_coma |
+Cadena Identificador Igual Comillas Identificador Comillas P_coma |
+Char Identificador:i3 P_coma{:
+    RESULT=i3.toString();
+    ta.crearEntradada(i3.toString(), "char");
+:}|
+Char Identificador:i3 Igual Numero:e3{:
+    RESULT=i3.toString();
+    ta.verificarVariableInde(i3.toString(),"char",e3.toString(),ta);
+:}
+P_coma |
+Char Identificador:i3 Igual Numero:e3 Punto Numero:e2{:
+    RESULT=i3.toString();
+    String nume=e3.toString()+"."+e2.toString();
+    ta.verificarVariableInde(i3.toString(),"char",nume,ta);
+:}
+P_coma |
+Char Identificador:i3 Igual Caracter:e3{:
+    RESULT=i3.toString();
+    ta.crearEntradada(i3.toString(), "char");
+    ta.setValor(i3.toString(), e3.toString());
+:}
+P_coma
 ;
 IF ::= If Parentesis_a SENTENCIA_BOOLEANA Parentesis_c Llave_a SENTENCIA Llave_c
 ;
