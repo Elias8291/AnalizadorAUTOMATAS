@@ -7,6 +7,8 @@ package codigo;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 public class AssemblerGenerator {
@@ -15,40 +17,78 @@ public class AssemblerGenerator {
     private StringBuilder dataSection;
     private StringBuilder codeSection;
     private boolean macroDefined = false;
+    private Map<String, String> previousOperations;
+    private boolean hasExecutedPlus = false;
 
     public AssemblerGenerator() {
         dataSection = new StringBuilder(".model small\n.data\n");
         codeSection = new StringBuilder(".code\nmov ax,@data\nmov ds,ax\nmov cx, 10 ; divisor\n");
+        previousOperations = new HashMap<>();
+
     }
 
     public String generateAssemblyCode(Vector<Quadruple> quadruples, TablaSimbolos tablaSimbolos) {
         int messageCount = 0;
         String resultVar = "";
+        String s = null;
+        boolean bande = false;
 
-        for (Quadruple quadruple : quadruples) {
+        boolean hasExecutedPlus = false;
+        boolean hasExecutedMinus = false;
+
+        for (int i = 0; i < quadruples.size(); i++) {
+            Quadruple quadruple = quadruples.get(i);
             String opcode = quadruple.operator;
             String arg1 = quadruple.operand1;
             String arg2 = quadruple.operand2;
             String result = quadruple.result;
-
+            System.out.println("opcion" + opcode.toString());
             switch (opcode) {
+
                 case "=":
-                   
-                    // Update the value of the variable in the data section
-                    int index = dataSection.indexOf(result + " dw ?");
-                    if (index != -1) {
-                        dataSection.replace(index, index + result.length() + 5, result + " dw " + arg1);
-                    }
-                    break;
                 case "+":
-                    dataSection.append(result + " dw ?\n");
-                    codeSection.append("mov ax, " + arg1 + "\nadd ax, " + arg2 + "\nmov " + result + ", ax\nmov d, ax"+ "\n");
-                    break;
                 case "-":
-                    dataSection.append(result + " dw ?\n");
-                    codeSection.append("mov ax, " + arg1 + "\nsub ax, " + arg2 + "\nmov " + result + ", ax\nmov d, ax" + "\n");
+
+                    if (arg2.isEmpty()) {
+
+                        String value = arg1;  // El valor es el primer operando
+                        int index = dataSection.indexOf(result + " dw ?");
+                        if (index != -1) {
+                            // Si la variable ya fue declarada, entonces solo actualizamos el valor.
+                            dataSection.replace(index, index + result.length() + 5, result + " dw " + value);
+
+                        } else {
+                            // Si la variable no ha sido declarada, la declaramos y asignamos el valor.
+                            dataSection.append(result + " dw " + value + "\n");
+
+                        }
+                    } else if (arg1.startsWith("temp")) {
+                        codeSection.append("mov ax, " + arg1 + "\nmov " + result + ", ax\n");
+
+                    }
+
+                    if (opcode.equals("+")) {
+
+                        dataSection.append(result + " dw ?\n");
+                        codeSection.append("mov ax, " + arg1 + "\nadd ax, " + arg2 + "\n");
+                        codeSection.append("mov " + result + ",ax\n");
+
+                        codeSection.append("mov " + s + ",ax\n");
+
+                    }
+                    if (opcode.equals("-")) {
+
+                        System.out.println("Soy este" + s);
+                        dataSection.append(result + " dw ?\n");
+                        codeSection.append("mov ax, " + arg1 + "\nsub ax, " + arg2 + "\n");
+                        codeSection.append("mov " + result + ",ax\n");
+
+                        codeSection.append("mov " + s + ",ax\n");
+
+                    }
 
                     break;
+
                 case "Print":
                     String messageName = "mensaje" + messageCount++;
                     arg1 = arg1.replace("\"", ""); // quita las comillas de la cadena
@@ -84,9 +124,14 @@ public class AssemblerGenerator {
                     codeSection.append("mov dl, 0Ah\n"); // line feed
                     codeSection.append("mov ah, 02h\n");
                     codeSection.append("int 21h\n");
+                    if (!arg1.startsWith("temp") && !bande && (hasExecutedPlus ^ hasExecutedMinus) ) {
+                        codeSection.append("mov " + result + ", ax\n"); // se guarda el resultado de la operación en la variable correspondiente
+                        bande = true;
+                    }
                     break;
                 case "Variable": // Handle variable initialization
                     dataSection.append(result + " dw ?\n");
+                    s = result;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown opcode: " + opcode);
